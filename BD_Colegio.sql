@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS Alumno(
 DELIMITER $$
 CREATE TRIGGER BI_Alumno_validateFields BEFORE INSERT ON Alumno FOR EACH ROW
 BEGIN
-    -- If the 'FK_Responsable' field is not given a value on the insert statment, raise an exception. This way, 'FK_responsable' will only be NULL if explicitly inserted as such
+    -- If the 'FK_Responsable' field is not given a value on the INSERT statment, raise an exception. This way, 'FK_responsable' will only be NULL if explicitly inserted as such
     IF NEW.FK_Responsable LIKE "__FLAG_DEFAULT_e2Hh5" THEN
         SIGNAL SQLSTATE "HY000"
             SET MESSAGE_TEXT= "Field 'FK_Responsable' must be stated explicitly";
@@ -104,4 +104,13 @@ CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
     CONSTRAINT FKC_AsistenciaProfesor_refsHorario FOREIGN KEY (FK_Horario) REFERENCES Horario(PK_id),
     CONSTRAINT UC_AsistenciaProfesor_naturalKey UNIQUE (FK_Horario, fecha)
     -- Professor is already referenced in the 'Horarios' table, there is no need for a FOREING KEY
+);
+
+CREATE TABLE IF NOT EXISTS `Alumno/Materia`(
+    PK_dniAlumno VARCHAR(20) NOT NULL,
+    PK_materia VARCHAR(50) NOT NULL,
+    calificacion TINYINT,
+    CONSTRAINT `PKC_Alumno/Materia_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_materia),
+    CONSTRAINT `FKC_Alumno/Materia_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
+    CONSTRAINT `FKC_Alumno/Materia_refsMateria` FOREIGN KEY (PK_materia) REFERENCES Materia(PK_nombre)
 );
