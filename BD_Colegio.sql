@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS Profesor(
     celular VARCHAR(20) NOT NULL,
     tarjetaId TEXT NOT NULL,
     direccion VARCHAR(200),
+    email VARCHAR(200) NOT NULL,
     fechaNacimiento DATE
 );
 
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS Responsable(
     apellido VARCHAR(50) NOT NULL,
     celular VARCHAR(20) NOT NULL,
     direccion VARCHAR(200) NOT NULL,
+    email VARCHAR(200) NOT NULL,
     fechaNacimiento DATE
 );
 
@@ -52,6 +54,7 @@ CREATE TABLE IF NOT EXISTS Alumno(
     apellido VARCHAR(50) NOT NULL,
     fechaNacimiento DATE NOT NULL,
     direccion VARCHAR(200) NOT NULL,
+    email VARCHAR(200) NOT NULL,
     tarjetaId TEXT NOT NULL,
     FK_Responsable VARCHAR(20) DEFAULT ("__FLAG_DEFAULT_e2Hh5"), -- here, the DEFAULT is simply a flag for the trigger
     foto TEXT, -- svg base64
