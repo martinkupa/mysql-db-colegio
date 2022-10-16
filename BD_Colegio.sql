@@ -1,14 +1,13 @@
 /*
     Naming conventions:
-        * Table names are capitalized: `Person`
+        * Table names are PascalCase: `Person`
         * Column names are camelCase: `userName`
         * Primary keys use the PK prefix: `PK_bookId`
         * Foreign keys use the FK prefix, followed by the name of the table being referenced,
           followed by the column name: `FK_Author_bookAuthor`
-          If the column name is redundant, it can be ommited: `FK_Author`
+          If the column name is redundant, it can be omitted: `FK_Author`
         * Constraint names use a custom prefix ending with the letter C that describes the type of the constraint,
           followed by the table name, followed by the constraint name in camel case: `UC_Book_naturalKey` `FKC_Book_refsAuthor`
-        * Trigger
 */
 
 CREATE DATABASE IF NOT EXISTS Colegio;
@@ -42,7 +41,7 @@ CREATE TABLE IF NOT EXISTS CursoOptativo(
     PK_id INT PRIMARY KEY,
     FK_Profesor VARCHAR(20) NOT NULL,
     division INT NOT NULL,
-    orientacion('Autocad', 'Aleman') NOT NULL,
+    orientacion ENUM('Autocad', 'Aleman') NOT NULL,
     CONSTRAINT UC_CursoOptativo_naturalKey UNIQUE (division, orientacion),
     CONSTRAINT FKC_CursoOptativo_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
@@ -90,7 +89,7 @@ CREATE TABLE IF NOT EXISTS HorarioCursoOptativo(
     dia ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes') NOT NULL,
     horaEntrada TIME NOT NULL,
     horaSalida TIME NOT NULL,
-    CONSTRAINT UC_HorarioCursoOptativo_naturalKey UNIQUE (FK_CursoOptativo, dia, hora),
+    CONSTRAINT UC_HorarioCursoOptativo_naturalKey UNIQUE (FK_CursoOptativo, dia, horaEntrada),
     CONSTRAINT UC_HorarioCursoOptativo_refsCursoOptativo FOREIGN KEY (FK_CursoOptativo) REFERENCES CursoOptativo(PK_id)
 );
 
@@ -138,21 +137,38 @@ CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
 );
 
 CREATE TABLE IF NOT EXISTS `Alumno/Materia`(
-    PK_dniAlumno VARCHAR(20) NOT NULL,
     PK_Materia VARCHAR(50) NOT NULL,
+    PK_dniAlumno VARCHAR(20) NOT NULL,
     calificacion TINYINT,
     CONSTRAINT `PKC_Alumno/Materia_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_materia),
     CONSTRAINT `FKC_Alumno/Materia_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
     CONSTRAINT `FKC_Alumno/Materia_refsMateria` FOREIGN KEY (PK_Materia) REFERENCES Materia(PK_nombre)
 );
 
-CREATE TABLE IF NOT EXISTS `Alumno/CursoOptativo`(
-    PK_dniAlumno VARCHAR(20) NOT NULL,
-    PK_CursoOptativo INT NOT NULL,
+
+/*
+    `AlumnoOptativas` represents a many to many relationship between `Alumnos` and `CursoOptativo`. Therefore, the usual 
+    `table1/table2` naming convention should apply. However, there are certain aspects of this relationship that forced me 
+    to make a separate table and use a composite FOREIGN KEY instead of a regular intermediate table.
+
+    A student can only be part of one and only one division, of a given orientation. That is, a student cannot be in 2th 
+    'Autocad' and 3th 'Autocad' at the same time. The UC_AlumnoOptativas_naturalKey prevents that from happening.
+    Were I to make a FOREIGN KEY referencing the `CursoOptativo`'s surrogate key, I would not be able to make the 
+    UC_AlumnoOptativas_naturalKey as I would not have access to the `orientacion` nor `division` fields.
+
+    Futhermore, I need to check if `AlumnoOptativas`'s `orientacion` and `division` fields match those on the 
+    `CursoOptativo` table. The only way to do that is by means of a composite FOREIGN KEY.
+*/
+CREATE TABLE IF NOT EXISTS AlumnoCursoOptativo(
+    /* maybe a hash? */
+    PK_id INT PRIMARY KEY AUTO_INCREMENT, -- Surrogate Key
+    FK_dniAlumno VARCHAR(20) NOT NULL,
+    orientacion ENUM('Autocad', 'Aleman') NOT NULL,
+    division INT NOT NULL,
     calificacion TINYINT,
-    CONSTRAINT `PKC_Alumno/CursoOptativo_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_CursoOptativo),
-    CONSTRAINT `FKC_Alumno/CursoOptativo_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
-    CONSTRAINT `FKC_Alumno/CursoOptativo_refsCursoOptativo` FOREIGN KEY (PK_CursoOptativo) REFERENCES CursoOptativo(PK_id)
+    CONSTRAINT UC_AlumnoCursoOptativo_naturalKey UNIQUE (FK_dniAlumno, orientacion),
+    CONSTRAINT FKC_AlumnoCursoOptativo_refsAlumno FOREIGN KEY (FK_dniAlumno) REFERENCES Alumno(PK_dni),
+    CONSTRAINT FKC_AlumnoCursoOptativo_refsCursoOptativoNaturalKey FOREIGN KEY (division, orientacion) REFERENCES CursoOptativo(division, orientacion) -- Order matters, make sure that the table being referenced has the fields of the unique constraint in the same order
 );
 
 CREATE TABLE IF NOT EXISTS `Alumno/Responsable`(
