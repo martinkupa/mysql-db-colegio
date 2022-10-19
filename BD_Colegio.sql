@@ -29,12 +29,25 @@ CREATE TABLE IF NOT EXISTS Curso(
     PK_id INT PRIMARY KEY AUTO_INCREMENT, -- Surrogate key
     año TINYINT NOT NULL,
     division TINYINT NOT NULL,
-    orientacion ENUM('Computacion', 'Automotor') NOT NULL,
+    orientacion ENUM('Computacion', 'Automotor', 'Ciclo basico') NOT NULL,
     CONSTRAINT UC_Curso_naturalKey UNIQUE (año, division)
 );
 
 CREATE TABLE IF NOT EXISTS Materia(
     PK_nombre VARCHAR(50) PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS Taller(
+    PK_nombre VARCHAR(50) PRIMARY KEY,
+    FK_Profesor VARCHAR(20),
+    CONSTRAINT FKC_Taller_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
+);
+
+CREATE TABLE IF NOT EXISTS RotacionTaller(
+    PK_id INT PRIMARY KEY AUTO_INCREMENT,
+    año TINYINT NOT NULL,
+    rotacion TINYINT NOT NULL,
+    CONSTRAINT UC_RotacionTaller_naturalKey UNIQUE(año, rotacion)
 );
 
 CREATE TABLE IF NOT EXISTS CursoOptativo(
@@ -66,8 +79,11 @@ CREATE TABLE IF NOT EXISTS Alumno(
     tarjetaId TEXT NOT NULL,
     mayoriaEdad TINYINT NOT NULL,
     foto TEXT, -- svg base64
-    FK_Curso INT NOT NULL,
-    CONSTRAINT FKC_Alumno_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id)
+    FK_año TINYINT NOT NULL,
+    FK_division TINYINT NOT NULL,
+    FK_rotacion TINYINT NOT NULL,
+    CONSTRAINT FKC_Alumno_refsCursoNaturalKey FOREIGN KEY (FK_año, FK_division) REFERENCES Curso(año, division),
+    CONSTRAINT FKC_Alumno_refsRotacionTallerNaturalKey FOREIGN KEY (FK_año, FK_rotacion) REFERENCES RotacionTaller(año, rotacion)
 );
 
 CREATE TABLE IF NOT EXISTS Horario(
@@ -99,13 +115,35 @@ CREATE TABLE IF NOT EXISTS EntradaCurso(
     horaEntrada TIME NOT NULL,
     horaSalida TIME NOT NULL,
     dia ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes') NOT NULL,
-    actividad ENUM('Laboratorio', 'Taller', 'Curricular', 'Ed. Fisica') NOT NULL,
+    actividad ENUM('Laboratorio', 'Curricular', 'Ed. Fisica') NOT NULL,
     CONSTRAINT UC_EntradaCurso_naturalKey UNIQUE (FK_Curso, dia, horaEntrada),
     CONSTRAINT FKC_EntradaCurso_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id)
 );
 
-CREATE TABLE IF NOT EXISTS EntradaProfesor(
+CREATE TABLE IF NOT EXISTS EntradaRotacionTaller(
     PK_id INT PRIMARY KEY AUTO_INCREMENT,
+    FK_RotacionTaller INT NOT NULL,
+    horaEntrada TIME NOT NULL,
+    horaSalida TIME NOT NULL,
+    dia ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes') NOT NULL,
+    CONSTRAINT UC_EntradaRotacionTaller_naturalKey UNIQUE (FK_RotacionTaller, dia, horaEntrada),
+    CONSTRAINT FKC_EntradaRotacionTaller_refsRotacionTaller FOREIGN KEY (FK_RotacionTaller) REFERENCES RotacionTaller(PK_id)
+);
+
+CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
+    PK_id INT PRIMARY KEY AUTO_INCREMENT,
+    FK_EntradaRotacionTaller INT NOT NULL,
+    FK_Alumno VARCHAR(20) NOT NULL,
+    fecha DATE NOT NULL DEFAULT (CURRENT_DATE()),
+    horaLlegada TIME DEFAULT (CURRENT_TIME()),
+    estado ENUM('Presente', 'Ausente', 'Tarde'),
+    CONSTRAINT UC_AsistenciaRotacionTaller_naturalKey UNIQUE (FK_EntradaRotacionTaller, fecha, FK_Alumno),
+    CONSTRAINT FKC_AsistenciaRotacionTaller_refsAlumno FOREIGN KEY (FK_Alumno) REFERENCES Alumno(PK_dni),
+    CONSTRAINT FKC_AsistenciaRotacionTaller_refsEntradaRotacionTaller FOREIGN KEY (FK_EntradaRotacionTaller) REFERENCES EntradaRotacionTaller(PK_id)
+);
+
+CREATE TABLE IF NOT EXISTS EntradaProfesor(
+    PK_id INT PRIMARY KEY AUTO_INCREMENT, -- Surrogate key
     FK_Profesor VARCHAR(20) NOT NULL,
     horaEntrada TIME NOT NULL,
     dia ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes') NOT NULL,
@@ -136,6 +174,39 @@ CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
     -- Professor is already referenced in the 'Horarios' table, there is no need for a FOREING KEY
 );
 
+CREATE TABLE IF NOT EXISTS ExcepcionDia(
+    fecha DATE NOT NULL,
+    descripcion VARCHAR(200)
+);
+
+CREATE TABLE IF NOT EXISTS ExcepcionEntrada(
+    PK_id INT PRIMARY KEY AUTO_INCREMENT,
+    FK_EntradaCurso INT NOT NULL,
+    fecha DATE NOT NULL,
+    horaEntrada TIME,
+    descripcion VARCHAR(200),
+    CONSTRAINT FKC_ExcepcionEntrada_refsEntradaCurso FOREIGN KEY (FK_EntradaCurso) REFERENCES EntradaCurso(PK_id),
+    CONSTRAINT UC_ExcepcionEntrada_naturalKey UNIQUE (FK_EntradaCurso, fecha)
+);
+
+CREATE TABLE IF NOT EXISTS `Alumno/CursoOptativo`(
+    PK_dniAlumno VARCHAR(20) NOT NULL,
+    PK_orientacion ENUM('Autocad', 'Aleman') NOT NULL,
+    FK_division INT NOT NULL,
+    calificacion TINYINT,
+    CONSTRAINT `PKC_Alumno/CursoOptativo_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_orientacion),
+    CONSTRAINT `FKC_Alumno/CursoOptativo_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
+    CONSTRAINT `FKC_Alumno/CursoOptativo_refsCursoOptativoNaturalKey` FOREIGN KEY (FK_division, PK_orientacion) REFERENCES CursoOptativo(division, orientacion) -- Order matters, make sure that the table being referenced has the fields of the unique constraint in the same order
+);
+
+CREATE TABLE IF NOT EXISTS `Alumno/Responsable`(
+    PK_dniAlumno VARCHAR(20) NOT NULL,
+    PK_dniResponsable VARCHAR(20) NOT NULL,
+    CONSTRAINT `PKC_Alumno/Responsable_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_dniResponsable),
+    CONSTRAINT `FKC_Alumno/Responsable_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
+    CONSTRAINT `FKC_Alumno/Responsable_refsResponsable` FOREIGN KEY (PK_dniResponsable) REFERENCES Responsable(PK_dni)
+);
+
 CREATE TABLE IF NOT EXISTS `Alumno/Materia`(
     PK_Materia VARCHAR(50) NOT NULL,
     PK_dniAlumno VARCHAR(20) NOT NULL,
@@ -145,36 +216,12 @@ CREATE TABLE IF NOT EXISTS `Alumno/Materia`(
     CONSTRAINT `FKC_Alumno/Materia_refsMateria` FOREIGN KEY (PK_Materia) REFERENCES Materia(PK_nombre)
 );
 
-
-/*
-    `AlumnoOptativas` represents a many to many relationship between `Alumnos` and `CursoOptativo`. Therefore, the usual 
-    `table1/table2` naming convention should apply. However, there are certain aspects of this relationship that forced me 
-    to make a separate table and use a composite FOREIGN KEY instead of a regular intermediate table.
-
-    A student can only be part of one and only one division, of a given orientation. That is, a student cannot be in 2th 
-    'Autocad' and 3th 'Autocad' at the same time. The UC_AlumnoOptativas_naturalKey prevents that from happening.
-    Were I to make a FOREIGN KEY referencing the `CursoOptativo`'s surrogate key, I would not be able to make the 
-    UC_AlumnoOptativas_naturalKey as I would not have access to the `orientacion` nor `division` fields.
-
-    Futhermore, I need to check if `AlumnoOptativas`'s `orientacion` and `division` fields match those on the 
-    `CursoOptativo` table. The only way to do that is by means of a composite FOREIGN KEY.
-*/
-CREATE TABLE IF NOT EXISTS AlumnoCursoOptativo(
-    /* maybe a hash? */
-    PK_id INT PRIMARY KEY AUTO_INCREMENT, -- Surrogate Key
-    FK_dniAlumno VARCHAR(20) NOT NULL,
-    orientacion ENUM('Autocad', 'Aleman') NOT NULL,
-    division INT NOT NULL,
-    calificacion TINYINT,
-    CONSTRAINT UC_AlumnoCursoOptativo_naturalKey UNIQUE (FK_dniAlumno, orientacion),
-    CONSTRAINT FKC_AlumnoCursoOptativo_refsAlumno FOREIGN KEY (FK_dniAlumno) REFERENCES Alumno(PK_dni),
-    CONSTRAINT FKC_AlumnoCursoOptativo_refsCursoOptativoNaturalKey FOREIGN KEY (division, orientacion) REFERENCES CursoOptativo(division, orientacion) -- Order matters, make sure that the table being referenced has the fields of the unique constraint in the same order
-);
-
-CREATE TABLE IF NOT EXISTS `Alumno/Responsable`(
-    PK_dniAlumno VARCHAR(20) NOT NULL,
-    PK_dniResponsable VARCHAR(20) NOT NULL,
-    CONSTRAINT `PKC_Alumno/Responsable_compositeKey` PRIMARY KEY (PK_dniAlumno, PK_dniResponsable),
-    CONSTRAINT `FKC_Alumno/Responsable_refsAlumno` FOREIGN KEY (PK_dniAlumno) REFERENCES Alumno(PK_dni),
-    CONSTRAINT `FKC_Alumno/Responsable_refsResponsable` FOREIGN KEY (PK_dniResponsable) REFERENCES Responsable(PK_dni)
+CREATE TABLE IF NOT EXISTS `Taller/RotacionTaller`(
+    PK_Taller VARCHAR(50) NOT NULL,
+    PK_RotacionTaller INT NOT NULL,
+    fechaInicio DATE,
+    fechaFin DATE,
+    CONSTRAINT `PKC_Taller/RotacionTaller_compositeKey` PRIMARY KEY (PK_Taller, PK_RotacionTaller),
+    CONSTRAINT `FKC_Taller/RotacionTaller_refsTaller` FOREIGN KEY (PK_Taller) REFERENCES Taller(PK_nombre),
+    CONSTRAINT `FKC_Taller/RotacionTaller_refsRotacionTaller` FOREIGN KEY (PK_RotacionTaller) REFERENCES RotacionTaller(PK_id)
 );
