@@ -45,9 +45,11 @@ CREATE TABLE IF NOT EXISTS Taller(
 
 CREATE TABLE IF NOT EXISTS RotacionTaller(
     PK_id INT PRIMARY KEY AUTO_INCREMENT,
+    FK_Profesor VARCHAR(20) NOT NULL,
     año TINYINT NOT NULL,
     rotacion TINYINT NOT NULL,
-    CONSTRAINT UC_RotacionTaller_naturalKey UNIQUE(año, rotacion)
+    CONSTRAINT UC_RotacionTaller_naturalKey UNIQUE(año, rotacion),
+    CONSTRAINT FKC_RotacionTaller_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
 
 CREATE TABLE IF NOT EXISTS CursoOptativo(
@@ -158,6 +160,9 @@ CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
     fecha DATE NOT NULL DEFAULT (CURRENT_DATE()),
     horaLlegada TIME DEFAULT (CURRENT_TIME()),
     estado ENUM('Presente', 'Ausente', 'Tarde'),
+    horaRetiro TIME,
+    FK_Responsable_firmaRetiro VARCHAR(20),
+    CONSTRAINT FKC_AsistenciaAlumno_refsResponsable FOREIGN KEY (FK_Responsable_firmaRetiro) REFERENCES Responsable(PK_dni),
     CONSTRAINT FKC_AsistenciaAlumno_refsEntradaCurso FOREIGN KEY (FK_EntradaCurso) REFERENCES EntradaCurso(PK_id),
     CONSTRAINT FKC_AsistenciaAlumno_refsAlumno FOREIGN KEY (FK_Alumno) REFERENCES Alumno(PK_dni),
     CONSTRAINT UC_AsistenciaAlumno_naturalKey UNIQUE (FK_EntradaCurso, fecha, FK_Alumno)
@@ -175,7 +180,7 @@ CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
 );
 
 CREATE TABLE IF NOT EXISTS ExcepcionDia(
-    fecha DATE NOT NULL,
+    fecha DATE PRIMARY KEY,
     descripcion VARCHAR(200)
 );
 
