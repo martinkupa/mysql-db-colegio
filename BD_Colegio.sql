@@ -14,6 +14,11 @@ CREATE DATABASE IF NOT EXISTS Colegio;
 
 USE Colegio;
 
+
+/*
+    Profesor:
+    Profesores del colegio
+*/
 CREATE TABLE IF NOT EXISTS Profesor(
     PK_dni VARCHAR(20) 
         PRIMARY KEY 
@@ -39,6 +44,10 @@ CREATE TABLE IF NOT EXISTS Profesor(
     fechaNacimiento DATE
 );
 
+/*
+    Curso:
+    Cursos del colegio
+*/
 CREATE TABLE IF NOT EXISTS Curso(
     PK_id INT 
         PRIMARY KEY 
@@ -53,12 +62,20 @@ CREATE TABLE IF NOT EXISTS Curso(
     CONSTRAINT UC_Curso_naturalKey UNIQUE (año, division)
 );
 
+/*
+    Materia:
+    Materias del Colegio
+*/
 CREATE TABLE IF NOT EXISTS Materia(
     PK_nombre VARCHAR(50) 
         PRIMARY KEY
         CHECK (PK_nombre != "")
 );
 
+/*
+    Taller:
+    Los talleres que se imparten en el colegio. Similar a la tabla materias.
+*/
 CREATE TABLE IF NOT EXISTS Taller(
     PK_nombre VARCHAR(50) 
         PRIMARY KEY
@@ -68,6 +85,10 @@ CREATE TABLE IF NOT EXISTS Taller(
     CONSTRAINT FKC_Taller_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
 
+/*
+    RotacionTaller:
+    Las rotaciones de taller del colegio
+*/
 CREATE TABLE IF NOT EXISTS RotacionTaller(
     PK_id INT 
         PRIMARY KEY 
@@ -82,6 +103,11 @@ CREATE TABLE IF NOT EXISTS RotacionTaller(
     CONSTRAINT FKC_RotacionTaller_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
 
+
+/*
+    CursoOptativo:
+    Las materias optativas del colegio
+*/
 CREATE TABLE IF NOT EXISTS CursoOptativo(
     PK_id INT 
         PRIMARY KEY,
@@ -95,6 +121,10 @@ CREATE TABLE IF NOT EXISTS CursoOptativo(
     CONSTRAINT FKC_CursoOptativo_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
 
+/*
+    Responsable:
+    Aquellos registrados como responsables de un alumno
+*/
 CREATE TABLE IF NOT EXISTS Responsable(
     PK_dni VARCHAR(20) 
         PRIMARY KEY
@@ -118,6 +148,11 @@ CREATE TABLE IF NOT EXISTS Responsable(
         NULL
 );
 
+
+/*
+    Alumno:
+    Los alumnos del colegio
+*/
 CREATE TABLE IF NOT EXISTS Alumno(
     PK_dni VARCHAR(20) 
         PRIMARY KEY
@@ -151,6 +186,10 @@ CREATE TABLE IF NOT EXISTS Alumno(
     CONSTRAINT FKC_Alumno_refsRotacionTallerNaturalKey FOREIGN KEY (FK_año, FK_rotacion) REFERENCES RotacionTaller(año, rotacion)
 );
 
+/*
+    Horario:
+    Los horarios de cada curso.
+*/
 CREATE TABLE IF NOT EXISTS Horario(
     PK_id INT 
         PRIMARY KEY 
@@ -171,6 +210,10 @@ CREATE TABLE IF NOT EXISTS Horario(
     CONSTRAINT UC_Horario_naturalKey UNIQUE (FK_Curso, dia, hora)
 );
 
+/*
+    HorarioCursoOptativo:
+    Los horarios de un curso optativo
+*/
 CREATE TABLE IF NOT EXISTS HorarioCursoOptativo(
     PK_id INT 
         PRIMARY KEY 
@@ -187,6 +230,10 @@ CREATE TABLE IF NOT EXISTS HorarioCursoOptativo(
     CONSTRAINT UC_HorarioCursoOptativo_refsCursoOptativo FOREIGN KEY (FK_CursoOptativo) REFERENCES CursoOptativo(PK_id)
 );
 
+/*
+    EntradaCurso:
+    Los horarios de entrada de los alumnos de un determinado curso a lo largo de la semana.
+*/
 CREATE TABLE IF NOT EXISTS EntradaCurso(
     PK_id INT 
         PRIMARY KEY 
@@ -205,6 +252,11 @@ CREATE TABLE IF NOT EXISTS EntradaCurso(
     CONSTRAINT FKC_EntradaCurso_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id)
 );
 
+/*
+    EntradaRotacionTaller:
+    Los horarios de entrada de los alumnos de una rotacion de taller a lo largo de la semana.
+    NOTA: No hay tabla de HorarioRotacionTaller porque al haber una solo taller por dia, no es necesaria.
+*/
 CREATE TABLE IF NOT EXISTS EntradaRotacionTaller(
     PK_id INT 
         PRIMARY KEY 
@@ -221,6 +273,10 @@ CREATE TABLE IF NOT EXISTS EntradaRotacionTaller(
     CONSTRAINT FKC_EntradaRotacionTaller_refsRotacionTaller FOREIGN KEY (FK_RotacionTaller) REFERENCES RotacionTaller(PK_id)
 );
 
+/*
+    AsistenciaRotacionTaller:
+    El presentismo de un alumno de taller.
+*/
 CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
     PK_id INT 
         PRIMARY KEY 
@@ -242,6 +298,10 @@ CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsEntradaRotacionTaller FOREIGN KEY (FK_EntradaRotacionTaller) REFERENCES EntradaRotacionTaller(PK_id)
 );
 
+/*
+    EntradaProfesor:
+    Los horarios de entrada de los profesores
+*/
 CREATE TABLE IF NOT EXISTS EntradaProfesor(
     PK_id INT 
         PRIMARY KEY 
@@ -256,12 +316,19 @@ CREATE TABLE IF NOT EXISTS EntradaProfesor(
     CONSTRAINT FKC_EntradaProfesor_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni)
 );
 
+/*
+    AsistenciaAlumno:
+    El presentismo del alumno. En caso de retiro anticipado, los campos horaRetido y (en caso de que el alumno sea menor) FK_Responsable_firmaRetiro deben ser rellenados.
+*/
 CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
     PK_id INT 
         PRIMARY KEY 
         AUTO_INCREMENT, -- Surrogate key
     FK_EntradaCurso INT 
         NOT NULL,
+    excepcion BIT
+        NOT NULL
+        DEFAULT (FALSE),
     FK_Alumno VARCHAR(20) 
         NOT NULL,
     fecha DATE 
@@ -282,6 +349,10 @@ CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
     CONSTRAINT UC_AsistenciaAlumno_naturalKey UNIQUE (FK_EntradaCurso, fecha, FK_Alumno)
 );
 
+/*
+    AsistenciaProfesor:
+    El presentismo de los profesores.
+*/
 CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
     PK_id INT 
         PRIMARY KEY 
@@ -301,6 +372,10 @@ CREATE TABLE IF NOT EXISTS AsistenciaProfesor(
     -- Professor is already referenced in the 'Horarios' table, there is no need for a FOREING KEY
 );
 
+/*
+    ExcepcionDia:
+    Los dias en los que no hay clase.
+*/
 CREATE TABLE IF NOT EXISTS ExcepcionDia(
     fecha DATE 
         PRIMARY KEY,
@@ -309,6 +384,10 @@ CREATE TABLE IF NOT EXISTS ExcepcionDia(
         CHECK (descripcion != "")
 );
 
+/*
+    ExcepcionEntrada:
+    Los dias en los que, por una situacion excepcional, los horarios de entrada de un curso son otros.
+*/
 CREATE TABLE IF NOT EXISTS ExcepcionEntrada(
     PK_id INT 
         PRIMARY KEY 
@@ -318,6 +397,8 @@ CREATE TABLE IF NOT EXISTS ExcepcionEntrada(
     fecha DATE 
         NOT NULL,
     horaEntrada TIME
+        NOT NULL,
+    horaSalida TIME
         NOT NULL,
     descripcion VARCHAR(200)
         NULL
