@@ -5,7 +5,7 @@
     RotacionTaller
     Alumno
 */
-Curso:
+Materia:
 INSERT INTO materias VALUES ('Lengua y Literatura');
 INSERT INTO materias VALUES ('Matematica');
 INSERT INTO materias VALUES ('Fisica');
