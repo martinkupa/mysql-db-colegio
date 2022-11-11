@@ -18,16 +18,16 @@ INSERT INTO materias VALUES ('Redes');
 INSERT INTO materias VALUES ('Algoritmos');
 
 RotacionTaller:
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000003','4','3')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000002','5','1')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000001','2','5')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('11001100','1','7')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00110011','6','1')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000001','4','1')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('50000005','3','5')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000004','2','7')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000010','1','2')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000009','2','3')
-INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000008','6','2')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000003','4','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000002','5','automotor')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000001','2','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('11001100','1','automotor')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00110011','6','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000001','4','automotor')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('50000005','3','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000004','2','automotor')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000010','1','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000009','2','computacion')
+INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000008','6','automotor')
 
 
