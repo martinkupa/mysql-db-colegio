@@ -16,13 +16,25 @@ INSERT INTO profesor VALUES ('00000008', 'Mario', 'Mario', '322262222223', '1030
 INSERT INTO profesor VALUES ('00000009', 'Simón', 'Nombrefalso', '123456789101', '12345', '4321 Calle Nombrecreativo', 'simon@mequedesinideas.gov.ar', '2000-1-1');
 INSERT INTO profesor VALUES ('00000010', 'Carlos', 'Carlíos', '022222222222', '00009', '6789 Carlos Carío', 'carlos@colegioficticio.gov.ar', '1999-12-30');
 
-INSERT INTO taller VALUES ('Soldadura', 'Elmer_Galaga');
-INSERT INTO taller VALUES ('Fundición', 'María_Mappy');
-INSERT INTO taller VALUES ('Electrónica', 'Martín_Kupa');
-INSERT INTO taller VALUES ('Carpentería', 'Joaquín_Da_Silva');
-INSERT INTO taller VALUES ('Automotores 1', 'Nehuen_Laje');
-INSERT INTO taller VALUES ('Automotores 2', 'Takumi_Fujiwara');
-INSERT INTO taller VALUES ('Automotores 3', 'Homero_Simpson');
-INSERT INTO taller VALUES ('Computación 1', 'Mario_Mario');
-INSERT INTO taller VALUES ('Computación 2', 'Simón_Nombrefalso');
-INSERT INTO taller VALUES ('Computación 3', 'Carlos_Carlíos');
+INSERT INTO taller VALUES ('Soldadura', '00110011');
+INSERT INTO taller VALUES ('Fundición', '11001100');
+INSERT INTO taller VALUES ('Electrónica', '00000001');
+INSERT INTO taller VALUES ('Carpentería', '00000002');
+INSERT INTO taller VALUES ('Automotores 1', '00000003');
+INSERT INTO taller VALUES ('Automotores 2', '00000004');
+INSERT INTO taller VALUES ('Automotores 3', '50000005');
+INSERT INTO taller VALUES ('Computación 1', '00000008');
+INSERT INTO taller VALUES ('Computación 2', '00000009');
+INSERT INTO taller VALUES ('Computación 3', '00000010');
+
+Da el error "Entrada duplicada '1' para la clave 'PRIMARY'"
+INSERT INTO cursooptativo VALUES ('01', '00110011', '1°', 'Aleman');
+INSERT INTO cursooptativo VALUES ( '11001100', '2°', 'Aleman');
+INSERT INTO cursooptativo VALUES ( '00000001', '3°', 'Aleman');
+INSERT INTO cursooptativo VALUES ( '00000002', '4°', 'Aleman');
+INSERT INTO cursooptativo VALUES ('00000003', '5°', 'Aleman');
+INSERT INTO cursooptativo VALUES ( '00000004', '1°', 'Autocad');
+INSERT INTO cursooptativo VALUES ('50000005', '2°', 'Autocad');
+INSERT INTO cursooptativo VALUES ( '00000008', '3°', 'Autocad');
+INSERT INTO cursooptativo VALUES ( '00000009', '4°', 'Autocad');
+INSERT INTO cursooptativo VALUES ('00000010', '5°', 'Autocad'); 
