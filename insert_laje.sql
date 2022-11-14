@@ -27,14 +27,20 @@ INSERT INTO taller VALUES ('Computación 1', '00000008');
 INSERT INTO taller VALUES ('Computación 2', '00000009');
 INSERT INTO taller VALUES ('Computación 3', '00000010');
 
+
 Da el error "Entrada duplicada '1' para la clave 'PRIMARY'"
-INSERT INTO cursooptativo VALUES ('01', '00110011', '1°', 'Aleman');
-INSERT INTO cursooptativo VALUES ( '11001100', '2°', 'Aleman');
-INSERT INTO cursooptativo VALUES ( '00000001', '3°', 'Aleman');
-INSERT INTO cursooptativo VALUES ( '00000002', '4°', 'Aleman');
-INSERT INTO cursooptativo VALUES ('00000003', '5°', 'Aleman');
-INSERT INTO cursooptativo VALUES ( '00000004', '1°', 'Autocad');
-INSERT INTO cursooptativo VALUES ('50000005', '2°', 'Autocad');
-INSERT INTO cursooptativo VALUES ( '00000008', '3°', 'Autocad');
-INSERT INTO cursooptativo VALUES ( '00000009', '4°', 'Autocad');
-INSERT INTO cursooptativo VALUES ('00000010', '5°', 'Autocad'); 
+INSERT INTO cursooptativo (PK_id, FK_profesor, division, orientacion) VALUES ( '00110011', '1°', 'Aleman');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '11001100', '2°', 'Aleman');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '00000001', '3°', 'Aleman');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '00000002', '4°', 'Aleman');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ('00000003', '5°', 'Aleman');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '00000004', '1°', 'Autocad');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ('50000005', '2°', 'Autocad');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '00000008', '3°', 'Autocad');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ( '00000009', '4°', 'Autocad');
+INSERT INTO cursooptativo VALUES (PK_id, FK_profesor, division, orientacion) ('00000010', '5°', 'Autocad'); 
+
+INSERT INTO responsable VALUES ('00100100', 'Marge', 'Simpson', '990900909090', '0784 Av Siempreviva', 'Marge@gmail.com', '1974-02-05');
+INSERT INTO responsable VALUES ('10200200', 'Filiberto', 'Fitzergard', '880800808080', '6789 Calle Fantástica', 'Filiberto@ymail.com', '1980-11-13');
+INSERT INTO responsable VALUES ('30030030', 'Luis', 'Spinaca', '777700707070', '5467 Coronel Cobayo', 'Spinaca@gmail.com', '1965-01-23');
+INSERT INTO responsable VALUES ('04040040', 'Ying', 'Zakama', '111121113111', '5545  Calle Azul', 'Ying@Minimazaibatsu.com', '1998-07-18')
