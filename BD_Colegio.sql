@@ -291,8 +291,13 @@ CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
     horaLlegada TIME 
         NOT NULL 
         DEFAULT (CURRENT_TIME()),
+    horaRetiro TIME 
+        NULL,
     estado ENUM("Presente", "Ausente", "Tarde")
         NOT NULL,
+    FK_Responsable_firmaRetiro VARCHAR(20)
+        NULL,
+    CONSTRAINT FKC_AsistenciaRotacionTaller_refsResponsable FOREIGN KEY (FK_Responsable_firmaRetiro) REFERENCES Responsable(PK_dni),
     CONSTRAINT UC_AsistenciaRotacionTaller_naturalKey UNIQUE (FK_EntradaRotacionTaller, fecha, FK_Alumno),
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsAlumno FOREIGN KEY (FK_Alumno) REFERENCES Alumno(PK_dni),
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsEntradaRotacionTaller FOREIGN KEY (FK_EntradaRotacionTaller) REFERENCES EntradaRotacionTaller(PK_id)
