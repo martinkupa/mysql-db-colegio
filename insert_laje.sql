@@ -47,3 +47,6 @@ INSERT INTO responsable VALUES ('04040040', 'Ying', 'Zakama', '111121113111', '5
 INSERT INTO responsable VALUES ('50505050', 'Sonia', 'Topper', '432123432123', '4321  Boulevard Equitativo', 'Sonia@aol.com', '1980-06-20');
 INSERT INTO responsable VALUES ('66600616', 'Lucifer', 'Infernus', '123454321234', '6666 Infierno', 'satan@hellmail.com', '0666-06-16');
 INSERT INTO responsable VALUES ('07047070', 'William', 'Wakesphere', '6789235678910', '8768 Villa Nacimiento', 'wakesphere@jamlet.com', '1978-02-19');
+INSERT INTO responsable VALUES ('02345090', 'Rezz', 'Sableponso', '6729436688212', '1111 Calle Responsable', 'Rezz@ponsabilidad.com', '1980-06-11');
+INSERT INTO responsable VALUES ('27017376', 'Esteban', 'Quito', '1227265574410', '0001 Juegode Palabras', 'armandoesteban@quito.com', '2000-01-12');
+INSERT INTO responsable VALUES ('11114444', 'Franco', 'Francostino', '5322212476910', '2345 Calle Genérica', 'Franco@franmail.com', '1960-01-29');
