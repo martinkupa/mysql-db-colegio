@@ -50,3 +50,25 @@ INSERT INTO responsable VALUES ('07047070', 'William', 'Wakesphere', '6789235678
 INSERT INTO responsable VALUES ('02345090', 'Rezz', 'Sableponso', '6729436688212', '1111 Calle Responsable', 'Rezz@ponsabilidad.com', '1980-06-11');
 INSERT INTO responsable VALUES ('27017376', 'Esteban', 'Quito', '1227265574410', '0001 Juegode Palabras', 'armandoesteban@quito.com', '2000-01-12');
 INSERT INTO responsable VALUES ('11114444', 'Franco', 'Francostino', '5322212476910', '2345 Calle Genérica', 'Franco@franmail.com', '1960-01-29');
+
+INSERT INTO horario VALUES ('01', '01', 'Lunes', '03:00', '03:00', '03:45');
+INSERT INTO horario VALUES ('02', '02', 'Lunes', '12:00', '12:00', '12:45');
+INSERT INTO horario VALUES ('03', '03', 'Martes', '14:00', '14:00', '14:45');
+INSERT INTO horario VALUES ('04', '04', 'Martes', '13:37', '13:37', '14:22');
+INSERT INTO horario VALUES ('05', '05', 'Miércoles', '11:45', '11:45', '12:30');
+INSERT INTO horario VALUES ('06', '06', 'Miércoles', '20:15', '20:15', '20:00');
+INSERT INTO horario VALUES ('07', '07', 'Jueves', '08:45', '08:45', '09:30');
+INSERT INTO horario VALUES ('08', '08', 'Jueves', '15:00', '15:00', '15:45');
+INSERT INTO horario VALUES ('09', '09', 'Viernes', '02:15', '02:15', '03:00');
+INSERT INTO horario VALUES ('10', '10', 'Viernes', '17:30', '17:30', '19:00');
+
+INSERT INTO horariocursooptativo VALUES ('01', '01', 'Lunes', '01:00', '01:00', '02:00');
+INSERT INTO horariocursooptativo VALUES ('02', '02', 'Lunes', '17:00', '17:00', '18:00');
+INSERT INTO horariocursooptativo VALUES ('03', '03', 'Martes', '18:00', '18:00', '19:00');
+INSERT INTO horariocursooptativo VALUES ('04', '04', 'Martes', '13:00', '13:00', '13:35');
+INSERT INTO horariocursooptativo VALUES ('05', '05', 'Miércoles', '12:45', '12:45', '13:30');
+INSERT INTO horariocursooptativo VALUES ('06', '06', 'Miércoles', '19:15', '19:15', '19:55');
+INSERT INTO horariocursooptativo VALUES ('07', '07', 'Jueves', '12:00', '12:00', '13:00');
+INSERT INTO horariocursooptativo VALUES ('08', '08', 'Jueves', '13:00', '13:00', '14:00');
+INSERT INTO horariocursooptativo VALUES ('09', '09', 'Viernes', '05:00', '05:00', '05:10');
+INSERT INTO horariocursooptativo VALUES ('10', '10', 'Viernes', '11:15', '11:15', '12:00');
