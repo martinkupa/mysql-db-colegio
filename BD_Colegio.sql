@@ -1,15 +1,3 @@
-/*
-    Naming conventions:
-        * Table names are PascalCase: `Person`
-        * Column names are camelCase: `userName`
-        * Primary keys use the PK prefix: `PK_bookId`
-        * Foreign keys use the FK prefix, followed by the name of the table being referenced,
-          followed by the column name: `FK_Author_bookAuthor`
-          If the column name is redundant, it can be omitted: `FK_Author`
-        * Constraint names use a custom prefix ending with the letter C that describes the type of the constraint,
-          followed by the table name, followed by the constraint name in camel case: `UC_Book_naturalKey` `FKC_Book_refsAuthor`
-*/
-
 CREATE DATABASE IF NOT EXISTS Colegio;
 
 USE Colegio;
@@ -198,8 +186,11 @@ CREATE TABLE IF NOT EXISTS Horario(
         NOT NULL,
     dia ENUM("Lunes", "Martes", "Miercoles", "Jueves", "Viernes") 
         NOT NULL,
-    hora TIME 
+    horaEntrada TIME 
         NOT NULL,
+    horaSalida TIME
+        NOT NULL
+        CHECK (horaEntrada < horaSalida),
     FK_Materia VARCHAR(50) 
         NOT NULL,
     FK_Profesor VARCHAR(20) 
@@ -207,8 +198,9 @@ CREATE TABLE IF NOT EXISTS Horario(
     CONSTRAINT FKC_Horario_refsMateria FOREIGN KEY (FK_Materia) REFERENCES Materia(PK_nombre),
     CONSTRAINT FKC_Horario_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id),
     CONSTRAINT FKC_Horario_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni),
-    CONSTRAINT UC_Horario_naturalKey UNIQUE (FK_Curso, dia, hora)
+    CONSTRAINT UC_Horario_naturalKey UNIQUE (FK_Curso, dia, horaEntrada)
 );
+
 
 /*
     HorarioCursoOptativo:
@@ -225,7 +217,8 @@ CREATE TABLE IF NOT EXISTS HorarioCursoOptativo(
     horaEntrada TIME 
         NOT NULL,
     horaSalida TIME 
-        NOT NULL,
+        NOT NULL
+        CHECK (horaEntrada < horaSalida),
     CONSTRAINT UC_HorarioCursoOptativo_naturalKey UNIQUE (FK_CursoOptativo, dia, horaEntrada),
     CONSTRAINT UC_HorarioCursoOptativo_refsCursoOptativo FOREIGN KEY (FK_CursoOptativo) REFERENCES CursoOptativo(PK_id)
 );
@@ -243,7 +236,8 @@ CREATE TABLE IF NOT EXISTS EntradaCurso(
     horaEntrada TIME 
         NOT NULL,
     horaSalida TIME 
-        NOT NULL,
+        NULL
+        CHECK (horaEntrada < horaSalida),
     dia ENUM("Lunes", "Martes", "Miercoles", "Jueves", "Viernes") 
         NOT NULL,
     actividad ENUM("Laboratorio", "Curricular", "Ed. Fisica") 
@@ -266,7 +260,8 @@ CREATE TABLE IF NOT EXISTS EntradaRotacionTaller(
     horaEntrada TIME 
         NOT NULL,
     horaSalida TIME 
-        NOT NULL,
+        NULL
+        CHECK (horaEntrada < horaSalida),
     dia ENUM("Lunes", "Martes", "Miercoles", "Jueves", "Viernes") 
         NOT NULL,
     CONSTRAINT UC_EntradaRotacionTaller_naturalKey UNIQUE (FK_RotacionTaller, dia, horaEntrada),
@@ -289,12 +284,12 @@ CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
         NOT NULL 
         DEFAULT (CURRENT_DATE()),
     horaLlegada TIME 
-        NOT NULL 
+        NULL 
         DEFAULT (CURRENT_TIME()),
-    horaRetiro TIME 
-        NULL,
     estado ENUM("Presente", "Ausente", "Tarde")
         NOT NULL,
+    horaRetiro TIME 
+        NULL,
     FK_Responsable_firmaRetiro VARCHAR(20)
         NULL,
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsResponsable FOREIGN KEY (FK_Responsable_firmaRetiro) REFERENCES Responsable(PK_dni),
@@ -340,7 +335,7 @@ CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
         NOT NULL 
         DEFAULT (CURRENT_DATE()),
     horaLlegada TIME 
-        NOT NULL 
+        NULL 
         DEFAULT (CURRENT_TIME()),
     estado ENUM("Presente", "Ausente", "Tarde")
         NOT NULL,
@@ -456,7 +451,8 @@ CREATE TABLE IF NOT EXISTS `Taller/RotacionTaller`(
     fechaInicio DATE
         NULL,
     fechaFin DATE
-        NULL,
+        NULL
+        CHECK (fechaInicio < fechaFin),
     CONSTRAINT `PKC_Taller/RotacionTaller_compositeKey` PRIMARY KEY (PK_Taller, PK_RotacionTaller),
     CONSTRAINT `FKC_Taller/RotacionTaller_refsTaller` FOREIGN KEY (PK_Taller) REFERENCES Taller(PK_nombre),
     CONSTRAINT `FKC_Taller/RotacionTaller_refsRotacionTaller` FOREIGN KEY (PK_RotacionTaller) REFERENCES RotacionTaller(PK_id)
