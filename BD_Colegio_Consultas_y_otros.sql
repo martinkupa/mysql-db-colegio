@@ -26,7 +26,10 @@ DELIMITER ;
 -- Mostrar las notas de los alumnos que sean mayores de edad ordenadas de mayor a menor
 -- 1 Subquery 1 Join 1 Order By
 SELECT 
-    * 
+    AlumnosMayores.nombre,
+    AlumnosMayores.apellido,
+    AlumnosMayores.mayoriaEdad,
+    AlumMat.calificacion
 FROM 
     (SELECT 
         * 
