@@ -2,7 +2,6 @@ CREATE DATABASE IF NOT EXISTS Colegio;
 
 USE Colegio;
 
-
 /*
     Profesor:
     Profesores del colegio
@@ -240,7 +239,7 @@ CREATE TABLE IF NOT EXISTS EntradaCurso(
         CHECK (horaEntrada < horaSalida),
     dia ENUM("Lunes", "Martes", "Miercoles", "Jueves", "Viernes") 
         NOT NULL,
-    actividad ENUM("Laboratorio", "Curricular", "Ed. Fisica") 
+    actividad ENUM("Laboratorio/Taller", "Curricular", "Ed. Fisica") 
         NOT NULL,
     CONSTRAINT UC_EntradaCurso_naturalKey UNIQUE (FK_Curso, dia, horaEntrada),
     CONSTRAINT FKC_EntradaCurso_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id)
@@ -457,3 +456,15 @@ CREATE TABLE IF NOT EXISTS `Taller/RotacionTaller`(
     CONSTRAINT `FKC_Taller/RotacionTaller_refsTaller` FOREIGN KEY (PK_Taller) REFERENCES Taller(PK_nombre),
     CONSTRAINT `FKC_Taller/RotacionTaller_refsRotacionTaller` FOREIGN KEY (PK_RotacionTaller) REFERENCES RotacionTaller(PK_id)
 );
+DELIMITER $$
+CREATE EVENT e_ManejoAsistencias
+    ON SCHEDULE 
+        EVERY 23 HOUR 
+        START CURRENT_TIMESTAMP()
+    COMMENT 'Inserta los ausentes'
+    DO main:BEGIN
+        DECLARE curso INT;
+        DECLARE CURSOR forEach_Curso FOR SELECT PK_id FROM Curso;
+        -- SELECT
+    END main$$
+DELIMITER ;

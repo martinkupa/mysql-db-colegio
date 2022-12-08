@@ -1,3 +1,13 @@
+CREATE USER 'Preceptoria'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL ON Colegio.* TO 'Preceptoria'@'localhost';
+CREATE VIEW AlumnosMayores AS
+    SELECT 
+        * 
+    FROM 
+        Alumno 
+    WHERE 
+        mayoriaEdad = TRUE;
+
 -- Este trigger previene que se solapen los horarios de los cursos.
 
 DELIMITER $$
@@ -31,13 +41,7 @@ SELECT
     AlumnosMayores.mayoriaEdad,
     AlumMat.calificacion
 FROM 
-    (SELECT 
-        * 
-    FROM 
-        Alumno 
-    WHERE 
-        mayoriaEdad = TRUE) 
-    AS AlumnosMayores 
+    AlumnosMayores 
     INNER JOIN 
     `Alumno/Materia` AS AlumMat 
     ON AlumMat.PK_dniAlumno = AlumnosMayores.PK_dni 

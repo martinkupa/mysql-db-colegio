@@ -1,0 +1,13 @@
+cae la tarjeta
+
+existe? no -> return
+
+saco datos
+
+reviso entrada curso. Hay horarios entrada en una ventana de 15 min? no -> lo mismo para taller, no? -> 
+
+estoy dentro de una ventana de tiempo? si -> muestro salida
+
+
+muestro siguiente horario
+
