@@ -45,15 +45,22 @@ CREATE TRIGGER t_checkAsistenciaIntegrity BEFORE INSERT ON AsistenciaAlumno
 FOR EACH ROW
 main:BEGIN
     DECLARE alumnoCurso INT;
+    DECLARE alumnoAge INT;
     DECLARE entradaCurso INT;
+    DECLARE excepcionEntradaCurso INT;
+    DECLARE excepcion INT;
+
     SELECT
-        Curso.PK_id
+        Curso.PK_id,
+        YEAR(DATEDIFF(CURRENT_DATE(), RelevantAlumno.fechaNacimiento)) AS age
     INTO
-        alumnoCurso
+        alumnoCurso,
+        alumnoAge
     FROM
         (SELECT
             Alumno.FK_año,
-            Alumno.FK_division
+            Alumno.FK_division,
+            Alumno.fechaNacimiento
         FROM
             Alumno
         WHERE
@@ -77,9 +84,38 @@ main:BEGIN
             SET MESSAGE_TEXT = "EntradaCurso's Curso does not match Alumno's"
     END IF;
 
-    IF (NEW.horaRetiro IS NOT NULL) THEN
-        
+    IF (NEW.FK_ExcepcionEntrada IS NOT NULL) THEN
+        SELECT
+            FK_EntradaCurso
+        INTO
+            excepcionEntradaCurso
+        FROM
+            ExcepcionEntrada
+        WHERE
+            ExcepcionEntrada.PK_id = NEW.FK_ExcepcionEntrada;
+        IF (NEW.FK_EntradaCurso != excepcionEntradaCurso) THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "ExcepcionEntrada's EntradaCurso does not match AsistenciaAlumno's";
+        END IF;
+    ELSE
+        SELECT
+            PK_id
+        INTO
+            NEW.FK_ExcepcionEntrada
+        FROM
+            ExcepcionEntrada
+        WHERE
+            ExcepcionEntrada.fecha LIKE CURRENT_DATE()
+            AND
+            ExcepcionEntrada.FK_EntradaCurso = NEW.FK_EntradaCurso;
     END IF;
+
+    IF ((NEW.horaRetiro IS NOT NULL) AND (NEW.FK_Responsable_firmaRetiro IS NULL) AND (alumnoAge < 18)) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = "Minors must be retired by a registered adult";
+    END IF;
+
+
 END main$$
 DELIMITER ;
 -- excepcion entrada overlap

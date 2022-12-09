@@ -187,7 +187,8 @@ CREATE TABLE IF NOT EXISTS Alumno(
     FK_rotacion TINYINT 
         NULL,
     CONSTRAINT FKC_Alumno_refsCursoNaturalKey FOREIGN KEY (FK_año, FK_division) REFERENCES Curso(año, division),
-    CONSTRAINT FKC_Alumno_refsRotacionTallerNaturalKey FOREIGN KEY (FK_año, FK_rotacion) REFERENCES RotacionTaller(año, rotacion)
+    CONSTRAINT FKC_Alumno_refsRotacionTallerNaturalKey FOREIGN KEY (FK_año, FK_rotacion) REFERENCES RotacionTaller(año, rotacion),
+    CONSTRAINT CC_Alumno_tallerCicloBasico CHECK (IF(FK_año < 3, NOT ISNULL(FK_rotacion), TRUE))
 ) COMMENT 'Los alumnos del colegio';
 
 /*
