@@ -61,7 +61,10 @@ CREATE TABLE IF NOT EXISTS Curso(
     orientacion ENUM("Computacion", "Automotor", "Ciclo basico") 
         NOT NULL 
         DEFAULT (IF(año < 3, "Ciclo basico", NULL)),
-    CONSTRAINT UC_Curso_naturalKey UNIQUE (año, division)
+    turno ENUM('Mañana', 'Tarde', 'Noche')
+        NOT NULL,
+    CONSTRAINT UC_Curso_naturalKey UNIQUE (año, division),
+    CONSTRAINT CC_Curso_tallerCicloBasico CHECK (IF(año < 3, "Ciclo Basico", orientacion) = orientacion)
 ) COMMENT 'Cursos del colegio';
 
 /*
