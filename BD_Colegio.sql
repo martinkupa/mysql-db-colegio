@@ -9,6 +9,7 @@
           If the column name is redundant, it can be omitted: `FK_Author`
         * Constraint names use a custom prefix ending with the letter C that describes the type of the constraint,
           followed by the table name, followed by the constraint name in camel case: `UC_Book_naturalKey` `FKC_Book_refsAuthor`
+          The only exception are check constraints, that use the constraint name as a way to give feedback
         * Intermediate tables that represent a many to many relationship between two already existing tables use 
           `TableOne/TableTwo` as their name: `Book/Publisher`
 */
@@ -64,7 +65,7 @@ CREATE TABLE IF NOT EXISTS Curso(
     turno ENUM('Mañana', 'Tarde', 'Noche')
         NOT NULL,
     CONSTRAINT UC_Curso_naturalKey UNIQUE (año, division),
-    CONSTRAINT CC_Curso_tallerCicloBasico CHECK (IF(año < 3, "Ciclo Basico", orientacion) = orientacion)
+    CONSTRAINT CC_Curso_ifAñoLessThanThreeEnforceOrientacion CHECK (IF(año < 3, orientacion LIKE "Ciclo Basico", /* do nothing */ TRUE) IS TRUE) -- Redundant 'IS TRUE' condition in order to coerce IF() result into a boolean expression
 ) COMMENT 'Cursos del colegio';
 
 /*
@@ -188,7 +189,7 @@ CREATE TABLE IF NOT EXISTS Alumno(
         NULL,
     CONSTRAINT FKC_Alumno_refsCursoNaturalKey FOREIGN KEY (FK_año, FK_division) REFERENCES Curso(año, division),
     CONSTRAINT FKC_Alumno_refsRotacionTallerNaturalKey FOREIGN KEY (FK_año, FK_rotacion) REFERENCES RotacionTaller(año, rotacion),
-    CONSTRAINT CC_Alumno_tallerCicloBasico CHECK (IF(FK_año < 3, NOT ISNULL(FK_rotacion), TRUE))
+    CONSTRAINT CC_Alumno_ifAñoLessThanThreeEnforceRotacion CHECK (IF(FK_año < 3, (NOT ISNULL(FK_rotacion)), /* Do nothing */ TRUE) IS TRUE)
 ) COMMENT 'Los alumnos del colegio';
 
 /*
@@ -215,7 +216,7 @@ CREATE TABLE IF NOT EXISTS Horario(
     CONSTRAINT FKC_Horario_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id),
     CONSTRAINT FKC_Horario_refsProfesor FOREIGN KEY (FK_Profesor) REFERENCES Profesor(PK_dni),
     CONSTRAINT UC_Horario_naturalKey UNIQUE (FK_Curso, dia, horaEntrada),
-    CONSTRAINT CC_Horario_checkTimes CHECK (horaEntrada < horaSalida)
+    CONSTRAINT CC_Horario_entradaLessThanSalida CHECK (horaEntrada < horaSalida)
 ) COMMENT 'Los horarios de cada curso';
 
 
@@ -237,7 +238,7 @@ CREATE TABLE IF NOT EXISTS HorarioCursoOptativo(
         NOT NULL,
     CONSTRAINT UC_HorarioCursoOptativo_naturalKey UNIQUE (FK_CursoOptativo, dia, horaEntrada),
     CONSTRAINT UC_HorarioCursoOptativo_refsCursoOptativo FOREIGN KEY (FK_CursoOptativo) REFERENCES CursoOptativo(PK_id),
-    CONSTRAINT CC_HorarioCursoOptativo_checkTimes CHECK (horaEntrada < horaSalida)
+    CONSTRAINT CC_HorarioCursoOptativo_entradaLessThanSalida CHECK (horaEntrada < horaSalida)
 ) COMMENT 'Los horarios de un curso optativo';
 
 /*
@@ -262,7 +263,7 @@ CREATE TABLE IF NOT EXISTS EntradaCurso(
         NOT NULL,
     CONSTRAINT UC_EntradaCurso_naturalKey UNIQUE (FK_Curso, dia, horaEntrada),
     CONSTRAINT FKC_EntradaCurso_refsCurso FOREIGN KEY (FK_Curso) REFERENCES Curso(PK_id),
-    CONSTRAINT CC_EntradaCurso_checkTimes CHECK (horaEntrada < horaSalida)
+    CONSTRAINT CC_EntradaCurso_entradaLessThanSalida CHECK (horaEntrada < horaSalida)
 ) COMMENT 'Los horarios de entrada de los alumnos de un determinado curso a lo largo de la semana. Note que si bien en la practica los horarios de entrada dependen de los horarios de las materias, esta tabla no depende de la tabla Horario';
 
 /*
@@ -284,7 +285,7 @@ CREATE TABLE IF NOT EXISTS EntradaRotacionTaller(
         NOT NULL,
     CONSTRAINT UC_EntradaRotacionTaller_naturalKey UNIQUE (FK_RotacionTaller, dia, horaEntrada),
     CONSTRAINT FKC_EntradaRotacionTaller_refsRotacionTaller FOREIGN KEY (FK_RotacionTaller) REFERENCES RotacionTaller(PK_id),
-    CONSTRAINT CC_EntradaRotacionTaller_checkTimes CHECK (horaEntrada < horaSalida)
+    CONSTRAINT CC_EntradaRotacionTaller_entradaLessThanSalida CHECK (horaEntrada < horaSalida)
 ) COMMENT 'Los horarios de entrada de los alumnos de una rotacion de taller a lo largo de la semana';
 
 /*
@@ -315,7 +316,7 @@ CREATE TABLE IF NOT EXISTS AsistenciaRotacionTaller(
     CONSTRAINT UC_AsistenciaRotacionTaller_naturalKey UNIQUE (FK_EntradaRotacionTaller, fecha, FK_Alumno),
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsAlumno FOREIGN KEY (FK_Alumno) REFERENCES Alumno(PK_dni),
     CONSTRAINT FKC_AsistenciaRotacionTaller_refsEntradaRotacionTaller FOREIGN KEY (FK_EntradaRotacionTaller) REFERENCES EntradaRotacionTaller(PK_id),
-    CONSTRAINT CC_AsistenciaRotacionTaller_checkTimes CHECK (horaLlegada < horaRetiro) /* Reminder: UNKNOWN doesnt violate check constraints */
+    CONSTRAINT CC_AsistenciaRotacionTaller_entradaLessThanSalida CHECK (horaLlegada < horaRetiro) /* Reminder: UNKNOWN doesnt violate check constraints */
 ) COMMENT 'El presentismo de un alumno de taller';
 
 /*
@@ -358,8 +359,8 @@ CREATE TABLE IF NOT EXISTS ExcepcionEntrada(
         CHECK (descripcion != ""),
     CONSTRAINT FKC_ExcepcionEntrada_refsEntradaCurso FOREIGN KEY (FK_EntradaCurso) REFERENCES EntradaCurso(PK_id),
     CONSTRAINT UC_ExcepcionEntrada_naturalKey UNIQUE (FK_EntradaCurso, fecha),
-    CONSTRAINT CC_ExcepcionEntrada_checkTimes CHECK (horaEntrada < horaSalida),
-    CONSTRAINT CC_ExcepcionEntrada_enforceCausality CHECK (IF(horaEntrada IS NULL, NULL, horaSalida) = horaSalida) /* If horaEntrada is NULL, then horaSalida should be too */
+    CONSTRAINT CC_ExcepcionEntrada_entradaLessThanSalida CHECK (horaEntrada < horaSalida),
+    CONSTRAINT CC_ExcepcionEntrada_ifEntradaIsNullSoIsSalida CHECK (IF(horaEntrada IS NULL, horaSalida IS NULL, /* do nothing */ TRUE) IS TRUE)
 ) COMMENT 'Los dias en los que, por una situacion excepcional, los horarios de entrada de un curso son otros. Un valor nulo para la horaEntrada significa que el alumno no debe asistir';
 
 /*
@@ -373,7 +374,7 @@ CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
         AUTO_INCREMENT, -- Surrogate key
     FK_EntradaCurso INT 
         NOT NULL,
-    FK_ExcepcionEntrada INT
+    FK_ExcepcionEntrada INT -- This field needs to query another table in order to set a default value. It is handled in the t**_checkAsistenciaIntegrity trigger
         NULL,
     FK_Alumno VARCHAR(20) 
         NOT NULL,
@@ -394,8 +395,9 @@ CREATE TABLE IF NOT EXISTS AsistenciaAlumno(
     CONSTRAINT FKC_AsistenciaAlumno_refsAlumno FOREIGN KEY (FK_Alumno) REFERENCES Alumno(PK_dni),
     CONSTRAINT FKC_AsistenciaAlumno_refsExcepcionEntrada FOREIGN KEY (FK_ExcepcionEntrada) REFERENCES ExcepcionEntrada(PK_id),
     CONSTRAINT UC_AsistenciaAlumno_naturalKey UNIQUE (FK_EntradaCurso, fecha, FK_Alumno),
-    CONSTRAINT CC_AsistenciaAlumno_checkTimes CHECK (horaLlegada < horaRetiro),
-    CONSTRAINT CC_AsistenciaAlumno_enforceCausality CHECK (IF(horaLlegada IS NULL, NULL, horaRetiro) = horaRetiro)
+    CONSTRAINT CC_AsistenciaAlumno_llegadaLessThanRetiro CHECK (horaLlegada < horaRetiro),
+    CONSTRAINT CC_AsistenciaAlumno_ifLlegadaIsNullSoIsRetiro CHECK (IF(horaLlegada IS NULL, horaRetiro IS NULL, /* Do nothing */ TRUE) IS TRUE),
+    CONSTRAINT CC_AsistenciaAlumno_ausenteImpliesLlegadaIsNullAndPresenteContrariwise CHECK (IF(estado LIKE "Ausente", ISNULL(horaLlegada), NOT ISNULL(horaLlegada)) IS TRUE) COMMENT 'test'
 ) COMMENT 'El presentismo del alumno. En caso de retiro anticipado, los campos horaRetiro y (en caso de que el alumno sea menor) FK_Responsable_firmaRetiro deben ser rellenados';
 
 /*

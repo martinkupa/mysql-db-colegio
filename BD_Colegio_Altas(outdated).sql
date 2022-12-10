@@ -63,21 +63,21 @@ INSERT INTO rotaciontaller(FK_Profesor,año,rotacion) VALUES ('00000008','6',2);
 
 
 -- Dasilva Curso:
-INSERT INTO curso(año,division,orientacion) VALUES (1,1,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (1,2,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (1,3,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (1,4,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (1,5,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (1,6,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (2,1,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (2,2,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (2,3,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (2,4,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (2,5,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (3,1,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (3,2,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (3,3,'curso basico');
-INSERT INTO curso(año,division,orientacion) VALUES (3,4,'curso basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,1,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,2,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,3,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,4,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,5,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (1,6,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (2,1,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (2,2,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (2,3,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (2,4,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (2,5,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (3,1,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (3,2,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (3,3,'Ciclo Basico');
+INSERT INTO curso(año,division,orientacion) VALUES (3,4,'Ciclo Basico');
 INSERT INTO curso(año,division,orientacion) VALUES (4,1,'computacion');
 INSERT INTO curso(año,division,orientacion) VALUES (4,2,'computacion');
 INSERT INTO curso(año,division,orientacion) VALUES (4,3,'automotor');
@@ -92,16 +92,17 @@ INSERT INTO curso(año,division,orientacion) VALUES (6,3,'automotor');
 INSERT INTO curso(año,division,orientacion) VALUES (6,4,'automotor');
 
 -- Dasilva Alumno:
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('54781771','Pablo','Bermudez','2003-9-19','Cullen_2023','pablocapo@gmail.com','543G76A','1','3','2',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('54682333','Anasui','Gutierrez','2004-10-20','Av.Truinvirato 2013','Anasuigutierrez2004@gmail.com','5165D6A','0','4','1',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('48291924','Astor','Cujoh','2005-5-31','Av Maipú 492','astoretegamer@gmail.com','55345AD','0','2','1',2);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('51235361','Ezequiel','Trefiletti','2001-3-10','Av Belgrano Sur 3185','Ezequielelmejor@gmail.com','5df23A','1','6','1',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('55123123','Jose','Jovin','2006-7-19','Arenales 3648','jojovinpro2006@hotmail.com.ar','649F9D1','0','1','2',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('54123649','Jorge','Silva','2004-08-01','Florida 700','jorgecolegio@gmail.com','523F2DA','0','3','4',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('52354245','Lozano','Valencia','2002-12-9','Av Colón 628','Loza2002@gmail.com','51235fd','1','5','2',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('54231234','Javier','Garcia','2003-01-05','Av Rivadavia 1291','javielmejor@gmail.com','54f31ad','1','4','2',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('53412356','Dante','Sparta','2004-3-11','Av Gaona 2525','dantewahoo@gmail.com','9df2af','0','3','4',1);
-INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,mayoriaEdad,FK_año,FK_division,FK_rotacion) VALUES ('53474561','Lautaro','Aleta','2002-06-09','Av Corrientes 655','lautarobasado@gmail.com','3254fd1','1','6','2',2);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('54781771','Pablo','Bermudez','2003-9-19','Cullen_2023','pablocapo@gmail.com','543G76A','3','2',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('54682333','Anasui','Gutierrez','2004-10-20','Av.Truinvirato 2013','Anasuigutierrez2004@gmail.com','5165D6A','4','1',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('48291924','Astor','Cujoh','2005-5-31','Av Maipú 492','astoretegamer@gmail.com','55345AD','2','1',2);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('51235361','Ezequiel','Trefiletti','2001-3-10','Av Belgrano Sur 3185','Ezequielelmejor@gmail.com','5df23A','6','1',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('55123123','Jose','Jovin','2006-7-19','Arenales 3648','jojovinpro2006@hotmail.com.ar','649F9D1','1','2',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('54123649','Jorge','Silva','2004-08-01','Florida 700','jorgecolegio@gmail.com','523F2DA','3','4',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('52354245','Lozano','Valencia','2002-12-9','Av Colón 628','Loza2002@gmail.com','51235fd','5','2',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('54231234','Javier','Garcia','2003-01-05','Av Rivadavia 1291','javielmejor@gmail.com','54f31ad','4','2',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('53412356','Dante','Sparta','2004-3-11','Av Gaona 2525','dantewahoo@gmail.com','9df2af','3','4',1);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('53474561','Lautaro','Aleta','2002-06-09','Av Corrientes 655','lautarobasado@gmail.com','3254fd1','6','2',2);
+INSERT INTO alumno(PK_dni,nombre,apellido,fechaNacimiento,direccion,email,tarjetaId,FK_año,FK_division,FK_rotacion) VALUES ('58454261','Julian','Maleta','2002-06-09','Av Godeto 777','alostrozos@gmail.com','3F54fd1','6','1',NULL);
 
 -- Kupa Alumno/Materia
 INSERT INTO `Alumno/Materia` VALUES ('Matematica', '54781771', 9);
@@ -243,16 +244,16 @@ INSERT INTO horariocursooptativo VALUES (10, 10, 'Viernes', '11:15', '11:20');
 
 -- Zelada EntradaCurso:
 
-insert into entradacurso Values('01','1','14:34','14:40','Lunes','Laboratorio');
+insert into entradacurso Values('01','1','14:34','14:40','Lunes','Laboratorio/Taller');
 insert into entradacurso Values('02','2','15:30','15:40','Martes','Curricular');
 insert into entradacurso Values('03','3','15:40','15:50','Martes','Curricular');
-insert into entradacurso Values('04','4','16:00','16:10','Miercoles','Ed, Fisica');
-insert into entradacurso Values('05','5','17:20','17:30','Jueves','Laboratorio');
-insert into entradacurso Values('06','6','17:40','17:50','Jueves','Laboratorio');
-insert into entradacurso Values('07','1','18:30','18:40','Jueves','Laboratorio');
-insert into entradacurso Values('08','2','18:00','18:10','Viernes','Ed, Fisica');
-insert into entradacurso Values('09','3','18:20','18:30','Viernes','Ed, Fisica');
-insert into entradacurso Values('10','4','18:40','20:30','Viernes','Ed, Fisica');
+insert into entradacurso Values('04','4','16:00','16:10','Miercoles','Ed. Fisica');
+insert into entradacurso Values('05','5','17:20','17:30','Jueves','Laboratorio/Taller');
+insert into entradacurso Values('06','6','17:40','17:50','Jueves','Laboratorio/Taller');
+insert into entradacurso Values('07','1','18:30','18:40','Jueves','Laboratorio/Taller');
+insert into entradacurso Values('08','2','18:00','18:10','Viernes','Ed. Fisica');
+insert into entradacurso Values('09','3','18:20','18:30','Viernes','Ed. Fisica');
+insert into entradacurso Values('10','4','18:40','20:30','Viernes','Ed. Fisica');
 
 -- Zelada EntradaRotacionTaller:
 
@@ -266,7 +267,7 @@ insert into entradarotaciontaller Values('07','07','15:00','17:00','Jueves');
 insert into entradarotaciontaller Values('08','08','15:10','17:10','Jueves');
 insert into entradarotaciontaller Values('09','09','15:20','17:20','Viernes');
 insert into entradarotaciontaller Values('10','10','16:00','18:00','Viernes');
-
+-- hasta aca
 -- Kupa AsistenciaAlumno:
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (1, '54781771', '2022-09-23', '04:30:43', 'Presente', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (2, '54682333', '2022-09-11', '18:25:36', 'Tarde', NULL, NULL);
@@ -274,7 +275,7 @@ INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, est
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (4, '51235361', '2022-10-06', '09:07:02', 'Tarde', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (5, '55123123', '2022-08-31', '09:23:29', 'Tarde', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (6, '54123649', '2022-10-27', '20:21:20', 'Tarde', NULL, NULL);
-INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (7, '52354245', '2022-11-08', null, 'Ausente', NULL, NULL);
+INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (7, '52354245', '2022-11-08', '02:02:02', 'Ausente', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (8, '54231234', '2022-09-21', null, 'Ausente', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (9, '53412356', '2022-09-30', null, 'Ausente', NULL, NULL);
 INSERT INTO AsistenciaAlumno(FK_EntradaCurso, FK_Alumno, fecha, horaLlegada, estado, horaRetiro, FK_Responsable_firmaRetiro) VALUES (10, '53474561', '2022-11-04', null, 'Ausente', NULL, NULL);

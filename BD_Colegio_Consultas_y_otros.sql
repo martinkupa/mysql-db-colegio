@@ -6,12 +6,17 @@
         * f Prefix for variables used in FETCH statements: `f_studentId`
         * tt Prefix for TEMPORARY TABLEs: `tt_RelevantBook`
 */
+
+/*
+    t**_checkTallerForAutomotor:
+    Los alumnos de automotor tienen una rotacion de taller durante toda la carrera. Este trigger cumple dicha norma 
+*/
 DELIMITER $$
-CREATE TRIGGER t_checkTallerForAutomotor BEFORE INSERT ON Alumno
+CREATE TRIGGER tbi_checkTallerForAutomotor_Alumno BEFORE INSERT ON Alumno
 FOR EACH ROW
 main:BEGIN
     DECLARE orientation VARCHAR(20);
-    IF (NEW.año < 3) THEN
+    IF (NEW.FK_año < 3) THEN
         LEAVE main;
     END IF;
 
@@ -22,37 +27,66 @@ main:BEGIN
     FROM 
         Curso 
     WHERE 
-        Curso.año = NEW.año 
+        Curso.año = NEW.FK_año 
         AND 
-        Curso.division = NEW.division;
+        Curso.division = NEW.FK_division;
 
-    IF (orientation LIKE "Automotor" AND NEW.rotacion IS NULL) THEN
+    IF (orientation LIKE "Automotor" AND NEW.FK_rotacion IS NULL) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = "'Automotor' students must have a 'rotacion'";
+            SET MESSAGE_TEXT = "Alumnos de la carrera Automotor deben tener una rotacion de taller";
+    END IF;
+END main$$
+DELIMITER ;
+DELIMITER $$
+
+CREATE TRIGGER tbu_checkTallerForAutomotor_Alumno BEFORE UPDATE ON Alumno
+FOR EACH ROW
+main:BEGIN
+    DECLARE orientation VARCHAR(20);
+    IF (NEW.FK_año < 3) THEN
+        LEAVE main;
     END IF;
 
+    SELECT 
+        orientacion 
+    INTO 
+        orientation 
+    FROM 
+        Curso 
+    WHERE 
+        Curso.año = NEW.FK_año 
+        AND 
+        Curso.division = NEW.FK_division;
+
+    IF (orientation LIKE "Automotor" AND NEW.FK_rotacion IS NULL) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = "Alumnos de la carrera Automotor deben tener una rotacion de taller";
+    END IF;
 END main$$
 DELIMITER ;
 
 
--- trigger for horariocursooptativo overlap
--- trigger for EntradaCurso overlap
--- trigger for EntradaRotacionTaller overlap
 
--- asistencia alumno pertenece al mismo curso q el horario y responsableretiro nulo solo si es mayor
+
+/*
+    t**_checkAsistenciaIntegrity:
+    Mantiene la integridad referencial entre tablas que referencian tablas comunes. Asegura que los alumnos menores sean retirados por un adulto 
+    y completa o revisa el campo de FK_ExcepcionEntrada en caso de ser necesario
+*/
 DELIMITER $$
-CREATE TRIGGER t_checkAsistenciaIntegrity BEFORE INSERT ON AsistenciaAlumno
+CREATE TRIGGER tbi_checkAsistenciaIntegrity_AsistenciaAlumno BEFORE INSERT ON AsistenciaAlumno
 FOR EACH ROW
 main:BEGIN
     DECLARE alumnoCurso INT;
     DECLARE alumnoAge INT;
     DECLARE entradaCurso INT;
     DECLARE excepcionEntradaCurso INT;
+    DECLARE newExcepcionEntrada INT;
     DECLARE excepcion INT;
 
     SELECT
         Curso.PK_id,
-        YEAR(DATEDIFF(CURRENT_DATE(), RelevantAlumno.fechaNacimiento)) AS age
+        YEAR(FROM_DAYS(DATEDIFF(CURRENT_DATE(), RelevantAlumno.fechaNacimiento))) AS age
     INTO
         alumnoCurso,
         alumnoAge
@@ -64,7 +98,7 @@ main:BEGIN
         FROM
             Alumno
         WHERE
-            Alumno.PK_id = NEW.FK_Alumno)
+            Alumno.PK_dni = NEW.FK_Alumno)
         AS RelevantAlumno
         INNER JOIN
         Curso
@@ -79,9 +113,9 @@ main:BEGIN
     WHERE
         EntradaCurso.PK_id = NEW.FK_EntradaCurso;
 
-    IF (alumnoCurso != horarioCurso) THEN
+    IF (alumnoCurso != entradaCurso) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = "EntradaCurso's Curso does not match Alumno's"
+            SET MESSAGE_TEXT = "El Curso de FK_EntradaCurso no coincide con el de FK_Alumno";
     END IF;
 
     IF (NEW.FK_ExcepcionEntrada IS NOT NULL) THEN
@@ -95,37 +129,120 @@ main:BEGIN
             ExcepcionEntrada.PK_id = NEW.FK_ExcepcionEntrada;
         IF (NEW.FK_EntradaCurso != excepcionEntradaCurso) THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = "ExcepcionEntrada's EntradaCurso does not match AsistenciaAlumno's";
+                SET MESSAGE_TEXT = "ExcepcionEntrada.FK_EntradaCurso no coincide con AsistenciaAlumno.FK_EntradaCurso";
         END IF;
     ELSE
         SELECT
             PK_id
         INTO
-            NEW.FK_ExcepcionEntrada
+            newExcepcionEntrada
         FROM
             ExcepcionEntrada
         WHERE
             ExcepcionEntrada.fecha LIKE CURRENT_DATE()
             AND
             ExcepcionEntrada.FK_EntradaCurso = NEW.FK_EntradaCurso;
+        SET NEW.FK_ExcepcionEntrada = newExcepcionEntrada;
     END IF;
 
     IF ((NEW.horaRetiro IS NOT NULL) AND (NEW.FK_Responsable_firmaRetiro IS NULL) AND (alumnoAge < 18)) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = "Minors must be retired by a registered adult";
+            SET MESSAGE_TEXT = "Los menores deben ser retirados por un adulto";
     END IF;
-
-
 END main$$
 DELIMITER ;
--- excepcion entrada overlap
-
-
 
 DELIMITER $$
-CREATE TRIGGER IF NOT EXISTS t_preventOverlapping BEFORE INSERT ON Horario
+CREATE TRIGGER tbu_checkAsistenciaIntegrity_AsistenciaAlumno BEFORE UPDATE ON AsistenciaAlumno
+FOR EACH ROW
+main:BEGIN
+    DECLARE alumnoCurso INT;
+    DECLARE alumnoAge INT;
+    DECLARE entradaCurso INT;
+    DECLARE excepcionEntradaCurso INT;
+    DECLARE newExcepcionEntrada INT;
+    DECLARE excepcion INT;
+
+    SELECT
+        Curso.PK_id,
+        YEAR(FROM_DAYS(DATEDIFF(CURRENT_DATE(), RelevantAlumno.fechaNacimiento))) AS age
+    INTO
+        alumnoCurso,
+        alumnoAge
+    FROM
+        (SELECT
+            Alumno.FK_año,
+            Alumno.FK_division,
+            Alumno.fechaNacimiento
+        FROM
+            Alumno
+        WHERE
+            Alumno.PK_dni = NEW.FK_Alumno)
+        AS RelevantAlumno
+        INNER JOIN
+        Curso
+    ON Curso.año = RelevantAlumno.FK_año AND Curso.division = RelevantAlumno.FK_division;
+
+    SELECT
+        FK_Curso
+    INTO
+        entradaCurso
+    FROM
+        EntradaCurso
+    WHERE
+        EntradaCurso.PK_id = NEW.FK_EntradaCurso;
+
+    IF (alumnoCurso != entradaCurso) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = "El Curso de FK_EntradaCurso no coincide con el de FK_Alumno";
+    END IF;
+
+    IF (NEW.FK_ExcepcionEntrada IS NOT NULL) THEN
+        SELECT
+            FK_EntradaCurso
+        INTO
+            excepcionEntradaCurso
+        FROM
+            ExcepcionEntrada
+        WHERE
+            ExcepcionEntrada.PK_id = NEW.FK_ExcepcionEntrada;
+        IF (NEW.FK_EntradaCurso != excepcionEntradaCurso) THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "ExcepcionEntrada.FK_EntradaCurso no coincide con AsistenciaAlumno.FK_EntradaCurso";
+        END IF;
+    ELSE
+        SELECT
+            PK_id
+        INTO
+            newExcepcionEntrada
+        FROM
+            ExcepcionEntrada
+        WHERE
+            ExcepcionEntrada.fecha LIKE CURRENT_DATE()
+            AND
+            ExcepcionEntrada.FK_EntradaCurso = NEW.FK_EntradaCurso;
+        SET NEW.FK_ExcepcionEntrada = newExcepcionEntrada;
+    END IF;
+
+    IF ((NEW.horaRetiro IS NOT NULL) AND (NEW.FK_Responsable_firmaRetiro IS NULL) AND (alumnoAge < 18)) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = "Los menores deben ser retirados por un adulto";
+    END IF;
+END main$$
+DELIMITER ;
+
+-- trigger for EntradaRotacionTaller overlap
+-- trigger for taller/rotaciontaller overlap
+/*
+    t**_preventOverlapping_*:
+    Previene que se solapen los diferentes rangos de tiempo
+*/
+
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbi_preventOverlapping_Horario BEFORE INSERT ON Horario
 FOR EACH ROW
 BEGIN
+    DECLARE errMessage VARCHAR(200);
     DECLARE done BIT DEFAULT FALSE;
     DECLARE startTime TIME;
     DECLARE endTIme TIME;
@@ -138,14 +255,250 @@ BEGIN
         IF done THEN
             LEAVE forEach;
         END IF;
-        IF (NEW.horaEntrada BETWEEN startTime AND endTime) OR (NEW.horaSalida BETWEEN startTime AND endTime) THEN
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
             SIGNAL SQLSTATE '45000' 
-                SET MESSAGE_TEXT = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+                SET MESSAGE_TEXT = errMessage;
         END IF;
     END LOOP;
     CLOSE myCursor;
 END$$
 DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbu_preventOverlapping_Horario BEFORE UPDATE ON Horario
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM Horario WHERE Horario.dia = NEW.dia AND Horario.FK_Curso = NEW.FK_Curso;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbi_preventOverlapping_EntradaCurso BEFORE INSERT ON EntradaCurso
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM EntradaCurso WHERE EntradaCurso.dia = NEW.dia AND EntradaCurso.FK_Curso = NEW.FK_Curso;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbu_preventOverlapping_EntradaCurso BEFORE UPDATE ON EntradaCurso
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM EntradaCurso WHERE EntradaCurso.dia = NEW.dia AND EntradaCurso.FK_Curso = NEW.FK_Curso;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbi_preventOverlapping_HorarioCursoOptativo BEFORE INSERT ON HorarioCursoOptativo
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM HorarioCursoOptativo WHERE HorarioCursoOptativo.dia = NEW.dia AND HorarioCursoOptativo.FK_CursoOptativo = NEW.FK_CursoOptativo;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbu_preventOverlapping_HorarioCursoOptativo BEFORE UPDATE ON HorarioCursoOptativo
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM HorarioCursoOptativo WHERE HorarioCursoOptativo.dia = NEW.dia AND HorarioCursoOptativo.FK_CursoOptativo = NEW.FK_CursoOptativo;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbi_preventOverlapping_ExcepcionEntrada BEFORE INSERT ON ExcepcionEntrada
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM ExcepcionEntrada WHERE ExcepcionEntrada.fecha = NEW.fecha AND ExcepcionEntrada.FK_EntradaCurso = NEW.FK_EntradaCurso;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbu_preventOverlapping_ExcepcionEntrada BEFORE UPDATE ON ExcepcionEntrada
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM ExcepcionEntrada WHERE ExcepcionEntrada.fecha = NEW.fecha AND ExcepcionEntrada.FK_EntradaCurso = NEW.FK_EntradaCurso;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbi_preventOverlapping_EntradaRotacionTaller BEFORE INSERT ON EntradaRotacionTaller
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM EntradaRotacionTaller WHERE EntradaRotacionTaller.dia = NEW.dia AND EntradaRotacionTaller.FK_RotacionTaller = NEW.FK_RotacionTaller;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER IF NOT EXISTS tbu_preventOverlapping_EntradaRotacionTaller BEFORE UPDATE ON EntradaRotacionTaller
+FOR EACH ROW
+BEGIN
+    DECLARE errMessage VARCHAR(200);
+    DECLARE done BIT DEFAULT FALSE;
+    DECLARE startTime TIME;
+    DECLARE endTIme TIME;
+    DECLARE id INT;
+    DECLARE myCursor CURSOR FOR SELECT horaEntrada, horaSalida, PK_id FROM EntradaRotacionTaller WHERE EntradaRotacionTaller.dia = NEW.dia AND EntradaRotacionTaller.FK_RotacionTaller = NEW.FK_RotacionTaller;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    OPEN myCursor;
+    forEach: LOOP
+        FETCH myCursor INTO startTime, endTIme, id;
+        IF done THEN
+            LEAVE forEach;
+        END IF;
+        IF (NEW.horaEntrada < endTime) AND (NEW.horaSalida > startTime) THEN
+            SET errMessage = CONCAT("Overlapping time frames are not allowed. Conflicting PK_id: ", CAST(id AS CHAR));
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = errMessage;
+        END IF;
+    END LOOP;
+    CLOSE myCursor;
+END$$
+DELIMITER ;
+-- overlap asistenciarotaciontaller
 
 
 DELIMITER $$
@@ -158,9 +511,6 @@ CREATE EVENT e_ManejoAsistencias
     DO main:BEGIN
         -- Variable declarations
         DECLARE currentWeekday VARCHAR(9) DEFAULT ELT(WEEKDAY(CURRENT_DATE())+1, "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo");
-        IF (currentWeekday IN ("Sabado", "Domingo")) THEN
-            LEAVE main;
-        END IF;
         -- Cursor related declarations
         DECLARE done_c_Curso BIT DEFAULT FALSE;
         DECLARE f_curso INT;
@@ -168,6 +518,9 @@ CREATE EVENT e_ManejoAsistencias
         DECLARE CONTINUE HANDLER FOR NOT FOUND 
             SET done_c_Curso = TRUE;
 
+        IF (currentWeekday IN ("Sabado", "Domingo")) THEN
+            LEAVE main;
+        END IF;
 
         OPEN c_Curso;
         forEach_Curso:LOOP
